@@ -57,8 +57,28 @@ const SmartEntryInput = () => {
       }
 
       console.log('Processed data:', data);
-      setProcessedEntry(data);
-      setEditedEntry({ ...data });
+      
+      // Ensure data is an object, not an array
+      let processedData = data;
+      if (Array.isArray(data)) {
+        processedData = data[0]; // Take the first item if it's an array
+      }
+      
+      // Ensure required fields have default values
+      processedData = {
+        entryType: 'cashflow',
+        type: 'saida',
+        amount: 0,
+        category: 'other',
+        paymentMethod: 'other',
+        status: 'pending',
+        suggestedDescription: 'Lançamento processado',
+        date: new Date().toISOString().split('T')[0],
+        ...processedData
+      };
+      
+      setProcessedEntry(processedData);
+      setEditedEntry({ ...processedData });
       
       toast({
         title: "Processado com sucesso!",
@@ -258,7 +278,7 @@ const SmartEntryInput = () => {
                   />
                 ) : (
                   <p className="font-medium">
-                    R$ {editedEntry.amount.toFixed(2)}
+                    R$ {(editedEntry.amount || 0).toFixed(2)}
                   </p>
                 )}
               </div>

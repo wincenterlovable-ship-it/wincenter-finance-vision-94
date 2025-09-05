@@ -40,6 +40,8 @@ serve(async (req) => {
             role: 'system',
             content: `Você é um assistente financeiro especializado em categorizar lançamentos financeiros. 
             
+            IMPORTANTE: Sempre retorne APENAS UM OBJETO JSON, nunca um array ou múltiplos objetos.
+            
             Analise a descrição fornecida e determine o tipo de lançamento e retorne um JSON com os seguintes campos:
             - entryType: "cashflow", "operational", ou "negotiation" (determine com base no contexto)
             - type: "entrada" ou "saida" (apenas para cashflow e operational)
@@ -59,6 +61,8 @@ serve(async (req) => {
             - installments: número de parcelas (se mencionado)
             - installmentValue: valor da parcela (se mencionado)
             - dueDate: data de vencimento estimada (formato YYYY-MM-DD)
+            
+            Se a descrição contém múltiplas transações, escolha a PRINCIPAL ou MAIS IMPORTANTE e retorne apenas essa.
             
             Exemplos:
             - "Comprei um lanche por R$ 15" -> {"entryType": "cashflow", "type": "saida", "amount": 15, "category": "food", "paymentMethod": "other", "status": "confirmed", "suggestedDescription": "Lanche"}
@@ -99,6 +103,20 @@ serve(async (req) => {
       }
       
       processedEntry = JSON.parse(jsonString);
+      
+      // If AI returns an array, take the first item
+      if (Array.isArray(processedEntry)) {
+        processedEntry = processedEntry[0] || {
+          entryType: 'cashflow',
+          type: 'saida',
+          amount: 0,
+          category: 'other',
+          paymentMethod: 'other',
+          status: 'pending',
+          suggestedDescription: description
+        };
+      }
+      
     } catch (parseError) {
       console.error('Error parsing AI response:', parseError);
       // Fallback response
