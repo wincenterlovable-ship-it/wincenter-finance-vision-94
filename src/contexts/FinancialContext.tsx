@@ -38,6 +38,8 @@ interface FinancialContextType {
   cashFlowEntries: CashFlowEntry[];
   operationalCosts: OperationalCost[];
   debts: Debt[];
+  selectedDate: string | null;
+  setSelectedDate: (date: string | null) => void;
   addCashFlowEntry: (entry: Omit<CashFlowEntry, 'id'>) => void;
   addOperationalCost: (cost: Omit<OperationalCost, 'id'>) => void;
   addDebt: (debt: Omit<Debt, 'id'>) => void;
@@ -52,6 +54,9 @@ interface FinancialContextType {
   getTotalDebts: () => number;
   getTotalOperationalCosts: () => number;
   getNetCashFlow: () => number;
+  getFilteredCashFlowEntries: () => CashFlowEntry[];
+  getFilteredOperationalCosts: () => OperationalCost[];
+  getFilteredDebts: () => Debt[];
 }
 
 const FinancialContext = createContext<FinancialContextType | undefined>(undefined);
@@ -72,6 +77,7 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
   const [cashFlowEntries, setCashFlowEntries] = useState<CashFlowEntry[]>([]);
   const [operationalCosts, setOperationalCosts] = useState<OperationalCost[]>([]);
   const [debts, setDebts] = useState<Debt[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const addCashFlowEntry = (entry: Omit<CashFlowEntry, 'id'>) => {
     const newEntry = { ...entry, id: Date.now().toString() };
@@ -137,24 +143,39 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
     }
   };
 
+  const getFilteredCashFlowEntries = () => {
+    if (!selectedDate) return cashFlowEntries;
+    return cashFlowEntries.filter(entry => entry.date === selectedDate);
+  };
+
+  const getFilteredOperationalCosts = () => {
+    if (!selectedDate) return operationalCosts;
+    return operationalCosts.filter(cost => cost.date === selectedDate);
+  };
+
+  const getFilteredDebts = () => {
+    if (!selectedDate) return debts;
+    return debts.filter(debt => debt.dueDate === selectedDate);
+  };
+
   const getTotalRevenue = () => {
-    return cashFlowEntries
+    return getFilteredCashFlowEntries()
       .filter(entry => entry.type === 'entrada')
       .reduce((total, entry) => total + entry.amount, 0);
   };
 
   const getTotalExpenses = () => {
-    return cashFlowEntries
+    return getFilteredCashFlowEntries()
       .filter(entry => entry.type === 'saida')
       .reduce((total, entry) => total + entry.amount, 0);
   };
 
   const getTotalDebts = () => {
-    return debts.reduce((total, debt) => total + debt.amount, 0);
+    return getFilteredDebts().reduce((total, debt) => total + debt.amount, 0);
   };
 
   const getTotalOperationalCosts = () => {
-    return operationalCosts.reduce((total, cost) => total + cost.amount, 0);
+    return getFilteredOperationalCosts().reduce((total, cost) => total + cost.amount, 0);
   };
 
   const getNetCashFlow = () => {
@@ -165,6 +186,8 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
     cashFlowEntries,
     operationalCosts,
     debts,
+    selectedDate,
+    setSelectedDate,
     addCashFlowEntry,
     addOperationalCost,
     addDebt,
@@ -179,6 +202,9 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
     getTotalDebts,
     getTotalOperationalCosts,
     getNetCashFlow,
+    getFilteredCashFlowEntries,
+    getFilteredOperationalCosts,
+    getFilteredDebts,
   };
 
   return (

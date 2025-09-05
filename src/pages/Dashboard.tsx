@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { BarChart3, DollarSign, TrendingDown, TrendingUp, Users, AlertTriangle, FileText, Activity } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BarChart3, DollarSign, TrendingDown, TrendingUp, Users, AlertTriangle, FileText, Activity, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Area, AreaChart, Bar, BarChart, Cell, Pie, PieChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { useFinancial } from "@/contexts/FinancialContext";
@@ -15,23 +16,44 @@ const Dashboard = () => {
     getNetCashFlow,
     cashFlowEntries,
     operationalCosts,
-    debts
+    debts,
+    selectedDate,
+    setSelectedDate,
+    getFilteredCashFlowEntries,
+    getFilteredOperationalCosts,
+    getFilteredDebts
   } = useFinancial();
 
-  // Calcular dados reais
+  // Obter todas as datas únicas do sistema
+  const getAllDates = () => {
+    const dates = new Set<string>();
+    cashFlowEntries.forEach(entry => dates.add(entry.date));
+    operationalCosts.forEach(cost => dates.add(cost.date));
+    debts.forEach(debt => dates.add(debt.dueDate));
+    return Array.from(dates).sort();
+  };
+
+  const availableDates = getAllDates();
+
+  // Calcular dados reais (já filtrados pela data)
   const totalRevenue = getTotalRevenue();
   const totalExpenses = getTotalExpenses();
   const totalDebts = getTotalDebts();
   const totalOperationalCosts = getTotalOperationalCosts();
   const netCashFlow = getNetCashFlow();
 
-  // Dados para gráficos baseados nos dados reais
+  // Obter dados filtrados
+  const filteredCashFlow = getFilteredCashFlowEntries();
+  const filteredOperationalCosts = getFilteredOperationalCosts();
+  const filteredDebts = getFilteredDebts();
+
+  // Dados para gráficos baseados nos dados filtrados
   const fluxoCaixaData = [
-    { mes: "Atual", entrada: totalRevenue, saida: totalExpenses, liquido: netCashFlow },
+    { mes: selectedDate || "Atual", entrada: totalRevenue, saida: totalExpenses, liquido: netCashFlow },
   ];
 
-  // Agrupar custos operacionais por categoria
-  const custosData = operationalCosts.reduce((acc, cost) => {
+  // Agrupar custos operacionais por categoria (filtrados)
+  const custosData = filteredOperationalCosts.reduce((acc, cost) => {
     const existing = acc.find(item => item.categoria === cost.category);
     if (existing) {
       existing.valor += cost.amount;
@@ -41,12 +63,12 @@ const Dashboard = () => {
     return acc;
   }, [] as { categoria: string; valor: number }[]);
 
-  // Separar custos fixos e variáveis
-  const fixedCosts = operationalCosts
+  // Separar custos fixos e variáveis (filtrados)
+  const fixedCosts = filteredOperationalCosts
     .filter(cost => cost.type === 'fixo')
     .reduce((sum, cost) => sum + cost.amount, 0);
   
-  const variableCosts = operationalCosts
+  const variableCosts = filteredOperationalCosts
     .filter(cost => cost.type === 'variavel')
     .reduce((sum, cost) => sum + cost.amount, 0);
 
@@ -78,9 +100,27 @@ const Dashboard = () => {
           <h1 className="text-3xl font-bold text-foreground">Dashboard Financeiro</h1>
           <p className="text-muted-foreground">Visão geral da situação financeira da Wincenter</p>
         </div>
-        <div className="text-right">
-          <p className="text-sm text-muted-foreground">Última atualização</p>
-          <p className="text-sm font-medium">{new Date().toLocaleDateString('pt-BR')}</p>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <Select value={selectedDate || "all"} onValueChange={(value) => setSelectedDate(value === "all" ? null : value)}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Filtrar por data" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as datas</SelectItem>
+                {availableDates.map((date) => (
+                  <SelectItem key={date} value={date}>
+                    {new Date(date + 'T00:00:00').toLocaleDateString('pt-BR')}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-muted-foreground">Última atualização</p>
+            <p className="text-sm font-medium">{new Date().toLocaleDateString('pt-BR')}</p>
+          </div>
         </div>
       </div>
 
@@ -93,7 +133,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">R$ {totalRevenue.toLocaleString('pt-BR')}</div>
-            <p className="text-xs opacity-80">{cashFlowEntries.filter(e => e.type === 'entrada').length} entradas registradas</p>
+            <p className="text-xs opacity-80">{filteredCashFlow.filter(e => e.type === 'entrada').length} entradas {selectedDate ? 'na data' : 'registradas'}</p>
           </CardContent>
         </Card>
 
@@ -104,7 +144,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">R$ {totalDebts.toLocaleString('pt-BR')}</div>
-            <p className="text-xs opacity-80">{debts.length} dívidas em aberto</p>
+            <p className="text-xs opacity-80">{filteredDebts.length} dívidas {selectedDate ? 'na data' : 'em aberto'}</p>
           </CardContent>
         </Card>
 
