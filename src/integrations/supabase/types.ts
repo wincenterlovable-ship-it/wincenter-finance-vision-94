@@ -14,7 +14,135 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      cash_flow_entries: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          date: string
+          description: string
+          id: string
+          payment_method: string | null
+          status: string | null
+          type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string
+          date: string
+          description: string
+          id?: string
+          payment_method?: string | null
+          status?: string | null
+          type: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          payment_method?: string | null
+          status?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      debts: {
+        Row: {
+          additional_terms: string
+          amount: number
+          created_at: string
+          creditor: string
+          description: string
+          due_date: string
+          id: string
+          installment_value: number
+          installments: number
+          justification: string
+          status: string
+          total_with_interest: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          additional_terms: string
+          amount: number
+          created_at?: string
+          creditor: string
+          description: string
+          due_date: string
+          id?: string
+          installment_value: number
+          installments: number
+          justification: string
+          status: string
+          total_with_interest: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          additional_terms?: string
+          amount?: number
+          created_at?: string
+          creditor?: string
+          description?: string
+          due_date?: string
+          id?: string
+          installment_value?: number
+          installments?: number
+          justification?: string
+          status?: string
+          total_with_interest?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      operational_costs: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          date: string
+          description: string
+          id: string
+          type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string
+          date: string
+          description: string
+          id?: string
+          type: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
