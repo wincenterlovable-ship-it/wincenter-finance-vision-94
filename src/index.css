@@ -1,0 +1,181 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Wincenter Financial System Design System - Professional Corporate Theme */
+
+@layer base {
+  :root {
+    /* Background & Surface Colors */
+    --background: 210 11% 96%;
+    --foreground: 215 25% 27%;
+    --surface: 0 0% 100%;
+    --surface-secondary: 210 11% 98%;
+
+    /* Card System */
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 27%;
+    --card-shadow: 215 25% 27% / 0.04;
+
+    /* Popover System */
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 27%;
+
+    /* Brand Colors - Professional Corporate Blue */
+    --primary: 214 84% 56%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 214 84% 66%;
+    --primary-dark: 214 84% 46%;
+
+    /* Secondary Colors - Elegant Gray */
+    --secondary: 215 16% 47%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-light: 215 16% 57%;
+
+    /* Accent Colors */
+    --accent: 214 84% 96%;
+    --accent-foreground: 214 84% 56%;
+
+    /* Success & Revenue Colors */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --success-light: 142 71% 55%;
+
+    /* Warning & Alert Colors */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Danger & Debt Colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Neutral Colors */
+    --muted: 215 16% 92%;
+    --muted-foreground: 215 16% 47%;
+    --border: 215 16% 88%;
+    --input: 215 16% 88%;
+    --ring: 214 84% 56%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(214, 84%, 56%), hsl(214, 84%, 66%));
+    --gradient-success: linear-gradient(135deg, hsl(142, 71%, 45%), hsl(142, 71%, 55%));
+    --gradient-surface: linear-gradient(180deg, hsl(0, 0%, 100%), hsl(210, 11%, 98%));
+
+    /* Shadows */
+    --shadow-card: 0 1px 3px hsl(215 25% 27% / 0.12), 0 1px 2px hsl(215 25% 27% / 0.24);
+    --shadow-elevated: 0 4px 6px hsl(215 25% 27% / 0.07), 0 2px 4px hsl(215 25% 27% / 0.06);
+    --shadow-floating: 0 10px 15px hsl(215 25% 27% / 0.1), 0 4px 6px hsl(215 25% 27% / 0.05);
+
+    /* Spacing & Typography */
+    --radius: 0.75rem;
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Chart Colors */
+    --chart-1: 214 84% 56%;
+    --chart-2: 142 71% 45%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 0 84% 60%;
+    --chart-5: 215 16% 47%;
+
+    /* Sidebar Variables */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Background & Surface Colors */
+    --background: 215 25% 8%;
+    --foreground: 210 11% 96%;
+    --surface: 215 25% 10%;
+    --surface-secondary: 215 25% 12%;
+
+    /* Card System */
+    --card: 215 25% 10%;
+    --card-foreground: 210 11% 96%;
+    --card-shadow: 0 0 0 / 0.8;
+
+    /* Popover System */
+    --popover: 215 25% 10%;
+    --popover-foreground: 210 11% 96%;
+
+    /* Brand Colors - Professional Corporate Blue */
+    --primary: 214 84% 66%;
+    --primary-foreground: 215 25% 8%;
+    --primary-light: 214 84% 76%;
+    --primary-dark: 214 84% 56%;
+
+    /* Secondary Colors - Elegant Gray */
+    --secondary: 215 16% 57%;
+    --secondary-foreground: 215 25% 8%;
+    --secondary-light: 215 16% 67%;
+
+    /* Accent Colors */
+    --accent: 215 25% 14%;
+    --accent-foreground: 214 84% 66%;
+
+    /* Success & Revenue Colors */
+    --success: 142 71% 55%;
+    --success-foreground: 215 25% 8%;
+    --success-light: 142 71% 65%;
+
+    /* Warning & Alert Colors */
+    --warning: 38 92% 60%;
+    --warning-foreground: 215 25% 8%;
+
+    /* Danger & Debt Colors */
+    --destructive: 0 84% 70%;
+    --destructive-foreground: 215 25% 8%;
+
+    /* Neutral Colors */
+    --muted: 215 25% 16%;
+    --muted-foreground: 215 16% 67%;
+    --border: 215 25% 18%;
+    --input: 215 25% 18%;
+    --ring: 214 84% 66%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(214, 84%, 66%), hsl(214, 84%, 76%));
+    --gradient-success: linear-gradient(135deg, hsl(142, 71%, 55%), hsl(142, 71%, 65%));
+    --gradient-surface: linear-gradient(180deg, hsl(215, 25%, 10%), hsl(215, 25%, 12%));
+
+    /* Shadows */
+    --shadow-card: 0 1px 3px hsl(0 0% 0% / 0.5), 0 1px 2px hsl(0 0% 0% / 0.8);
+    --shadow-elevated: 0 4px 6px hsl(0 0% 0% / 0.3), 0 2px 4px hsl(0 0% 0% / 0.2);
+    --shadow-floating: 0 10px 15px hsl(0 0% 0% / 0.4), 0 4px 6px hsl(0 0% 0% / 0.2);
+
+    /* Chart Colors */
+    --chart-1: 214 84% 66%;
+    --chart-2: 142 71% 55%;
+    --chart-3: 38 92% 60%;
+    --chart-4: 0 84% 70%;
+    --chart-5: 215 16% 67%;
+
+    /* Sidebar Variables */
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
