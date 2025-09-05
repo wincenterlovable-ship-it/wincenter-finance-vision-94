@@ -12,18 +12,24 @@ import { supabase } from "@/integrations/supabase/client";
 import { useFinancial } from "@/contexts/FinancialContext";
 
 interface ProcessedEntry {
-  type: 'entrada' | 'saida';
+  entryType: 'cashflow' | 'operational' | 'negotiation';
+  type?: 'entrada' | 'saida';
   amount: number;
   category: string;
   paymentMethod: string;
   status: string;
   suggestedDescription: string;
   date: string;
+  // Campos específicos para negociações
+  creditor?: string;
+  installments?: number;
+  installmentValue?: number;
+  dueDate?: string;
 }
 
 const SmartEntryInput = () => {
   const { toast } = useToast();
-  const { addCashFlowEntry } = useFinancial();
+  const { addCashFlowEntry, addOperationalCost, addDebt } = useFinancial();
   const [inputText, setInputText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [processedEntry, setProcessedEntry] = useState<ProcessedEntry | null>(null);
@@ -75,19 +81,42 @@ const SmartEntryInput = () => {
     if (!editedEntry) return;
 
     try {
-      await addCashFlowEntry({
-        description: editedEntry.suggestedDescription,
-        type: editedEntry.type,
-        amount: editedEntry.amount,
-        date: editedEntry.date,
-        category: editedEntry.category,
-        status: editedEntry.status,
-        paymentMethod: editedEntry.paymentMethod,
-      });
+      if (editedEntry.entryType === 'cashflow') {
+        await addCashFlowEntry({
+          description: editedEntry.suggestedDescription,
+          type: editedEntry.type!,
+          amount: editedEntry.amount,
+          date: editedEntry.date,
+          category: editedEntry.category,
+          status: editedEntry.status,
+          paymentMethod: editedEntry.paymentMethod,
+        });
+      } else if (editedEntry.entryType === 'operational') {
+        await addOperationalCost({
+          description: editedEntry.suggestedDescription,
+          type: editedEntry.type === 'saida' ? 'variavel' : 'fixo',
+          amount: editedEntry.amount,
+          date: editedEntry.date,
+          category: editedEntry.category,
+        });
+      } else if (editedEntry.entryType === 'negotiation') {
+        await addDebt({
+          description: editedEntry.suggestedDescription,
+          amount: editedEntry.amount,
+          installments: editedEntry.installments || 1,
+          installmentValue: editedEntry.installmentValue || editedEntry.amount,
+          dueDate: editedEntry.dueDate || editedEntry.date,
+          creditor: editedEntry.creditor || 'Não informado',
+          status: editedEntry.status === 'confirmed' ? 'negotiating' : 'pending',
+          additionalTerms: '',
+          justification: editedEntry.suggestedDescription,
+          totalWithInterest: (editedEntry.installments || 1) * (editedEntry.installmentValue || editedEntry.amount),
+        });
+      }
 
       toast({
         title: "Lançamento adicionado!",
-        description: "O lançamento foi salvo no sistema.",
+        description: `${editedEntry.entryType === 'cashflow' ? 'Fluxo de caixa' : editedEntry.entryType === 'operational' ? 'Custo operacional' : 'Negociação'} salvo no sistema.`,
       });
 
       // Reset form
@@ -106,12 +135,22 @@ const SmartEntryInput = () => {
     }
   };
 
-  const getTypeLabel = (type: string) => {
-    return type === 'entrada' ? 'Entrada' : 'Saída';
+  const getEntryTypeLabel = (entryType: string) => {
+    switch (entryType) {
+      case 'cashflow': return 'Fluxo de Caixa';
+      case 'operational': return 'Custo Operacional';
+      case 'negotiation': return 'Negociação';
+      default: return entryType;
+    }
   };
 
-  const getTypeColor = (type: string) => {
-    return type === 'entrada' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+  const getEntryTypeColor = (entryType: string) => {
+    switch (entryType) {
+      case 'cashflow': return 'bg-blue-100 text-blue-800';
+      case 'operational': return 'bg-orange-100 text-orange-800';
+      case 'negotiation': return 'bg-purple-100 text-purple-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
   return (
@@ -174,28 +213,37 @@ const SmartEntryInput = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Tipo</Label>
-                {isEditing ? (
-                  <Select
-                    value={editedEntry.type}
-                    onValueChange={(value) => 
-                      setEditedEntry({ ...editedEntry, type: value as 'entrada' | 'saida' })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="entrada">Entrada</SelectItem>
-                      <SelectItem value="saida">Saída</SelectItem>
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Badge className={getTypeColor(editedEntry.type)}>
-                    {getTypeLabel(editedEntry.type)}
-                  </Badge>
-                )}
+                <Label>Tipo de Lançamento</Label>
+                <Badge className={getEntryTypeColor(editedEntry.entryType)}>
+                  {getEntryTypeLabel(editedEntry.entryType)}
+                </Badge>
               </div>
+
+              {(editedEntry.entryType === 'cashflow' || editedEntry.entryType === 'operational') && (
+                <div>
+                  <Label>Entrada/Saída</Label>
+                  {isEditing ? (
+                    <Select
+                      value={editedEntry.type}
+                      onValueChange={(value) => 
+                        setEditedEntry({ ...editedEntry, type: value as 'entrada' | 'saida' })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="entrada">Entrada</SelectItem>
+                        <SelectItem value="saida">Saída</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Badge className={editedEntry.type === 'entrada' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+                      {editedEntry.type === 'entrada' ? 'Entrada' : 'Saída'}
+                    </Badge>
+                  )}
+                </div>
+              )}
 
               <div>
                 <Label>Valor</Label>
@@ -214,6 +262,20 @@ const SmartEntryInput = () => {
                   </p>
                 )}
               </div>
+
+              {editedEntry.entryType === 'negotiation' && editedEntry.creditor && (
+                <div>
+                  <Label>Credor</Label>
+                  <p className="font-medium">{editedEntry.creditor}</p>
+                </div>
+              )}
+
+              {editedEntry.entryType === 'negotiation' && editedEntry.installments && (
+                <div>
+                  <Label>Parcelas</Label>
+                  <p className="font-medium">{editedEntry.installments}x de R$ {(editedEntry.installmentValue || 0).toFixed(2)}</p>
+                </div>
+              )}
 
               <div>
                 <Label>Categoria</Label>
@@ -244,31 +306,33 @@ const SmartEntryInput = () => {
                 )}
               </div>
 
-              <div>
-                <Label>Forma de Pagamento</Label>
-                {isEditing ? (
-                  <Select
-                    value={editedEntry.paymentMethod}
-                    onValueChange={(value) => 
-                      setEditedEntry({ ...editedEntry, paymentMethod: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cash">Dinheiro</SelectItem>
-                      <SelectItem value="credit">Cartão de Crédito</SelectItem>
-                      <SelectItem value="debit">Cartão de Débito</SelectItem>
-                      <SelectItem value="pix">PIX</SelectItem>
-                      <SelectItem value="transfer">Transferência</SelectItem>
-                      <SelectItem value="other">Outros</SelectItem>
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Badge variant="outline">{editedEntry.paymentMethod}</Badge>
-                )}
-              </div>
+              {editedEntry.entryType !== 'negotiation' && (
+                <div>
+                  <Label>Forma de Pagamento</Label>
+                  {isEditing ? (
+                    <Select
+                      value={editedEntry.paymentMethod}
+                      onValueChange={(value) => 
+                        setEditedEntry({ ...editedEntry, paymentMethod: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="cash">Dinheiro</SelectItem>
+                        <SelectItem value="credit">Cartão de Crédito</SelectItem>
+                        <SelectItem value="debit">Cartão de Débito</SelectItem>
+                        <SelectItem value="pix">PIX</SelectItem>
+                        <SelectItem value="transfer">Transferência</SelectItem>
+                        <SelectItem value="other">Outros</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Badge variant="outline">{editedEntry.paymentMethod}</Badge>
+                  )}
+                </div>
+              )}
 
               <div className="col-span-2">
                 <Label>Descrição</Label>

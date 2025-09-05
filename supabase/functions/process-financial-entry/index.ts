@@ -40,20 +40,31 @@ serve(async (req) => {
             role: 'system',
             content: `Você é um assistente financeiro especializado em categorizar lançamentos financeiros. 
             
-            Analise a descrição fornecida e retorne um JSON com os seguintes campos:
-            - type: "entrada" ou "saida" 
+            Analise a descrição fornecida e determine o tipo de lançamento e retorne um JSON com os seguintes campos:
+            - entryType: "cashflow", "operational", ou "negotiation" (determine com base no contexto)
+            - type: "entrada" ou "saida" (apenas para cashflow e operational)
             - amount: valor numérico estimado (se não especificado, retorne 0)
             - category: uma das categorias: "food", "transport", "health", "education", "entertainment", "utilities", "salary", "investment", "other"
             - paymentMethod: "cash", "credit", "debit", "pix", "transfer" ou "other"
             - status: "confirmed", "pending" ou "paid"
             - suggestedDescription: versão limpa e organizada da descrição original
             
-            Seja preciso na análise e sempre retorne um JSON válido. Se algo não estiver claro, faça a melhor estimativa baseada no contexto.
+            REGRAS DE CLASSIFICAÇÃO:
+            - "negotiation": Negociações de dívidas, acordos, renegociações, parcelamentos
+            - "operational": Custos operacionais fixos ou variáveis da empresa/pessoa
+            - "cashflow": Entradas e saídas pontuais de dinheiro
+            
+            Para negociações, inclua campos adicionais:
+            - creditor: nome do credor (se mencionado)
+            - installments: número de parcelas (se mencionado)
+            - installmentValue: valor da parcela (se mencionado)
+            - dueDate: data de vencimento estimada (formato YYYY-MM-DD)
             
             Exemplos:
-            - "Comprei um lanche por R$ 15" -> {"type": "saida", "amount": 15, "category": "food", "paymentMethod": "other", "status": "confirmed", "suggestedDescription": "Lanche"}
-            - "Recebi salário" -> {"type": "entrada", "amount": 0, "category": "salary", "paymentMethod": "transfer", "status": "confirmed", "suggestedDescription": "Salário"}
-            - "Paguei conta de luz R$ 120" -> {"type": "saida", "amount": 120, "category": "utilities", "paymentMethod": "other", "status": "paid", "suggestedDescription": "Conta de Luz"}`
+            - "Comprei um lanche por R$ 15" -> {"entryType": "cashflow", "type": "saida", "amount": 15, "category": "food", "paymentMethod": "other", "status": "confirmed", "suggestedDescription": "Lanche"}
+            - "Recebi salário" -> {"entryType": "cashflow", "type": "entrada", "amount": 0, "category": "salary", "paymentMethod": "transfer", "status": "confirmed", "suggestedDescription": "Salário"}
+            - "Paguei conta de luz R$ 120" -> {"entryType": "operational", "type": "saida", "amount": 120, "category": "utilities", "paymentMethod": "other", "status": "paid", "suggestedDescription": "Conta de Luz"}
+            - "Negociação dívida banco 30mil, 48x 1500" -> {"entryType": "negotiation", "amount": 30000, "creditor": "banco", "installments": 48, "installmentValue": 1500, "status": "pending", "suggestedDescription": "Negociação de dívida bancária"}`
           },
           {
             role: 'user',
@@ -79,11 +90,20 @@ serve(async (req) => {
     // Parse the JSON response from AI
     let processedEntry;
     try {
-      processedEntry = JSON.parse(aiResponse);
+      // Remove markdown formatting if present
+      let jsonString = aiResponse.trim();
+      if (jsonString.startsWith('```json')) {
+        jsonString = jsonString.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (jsonString.startsWith('```')) {
+        jsonString = jsonString.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+      
+      processedEntry = JSON.parse(jsonString);
     } catch (parseError) {
       console.error('Error parsing AI response:', parseError);
       // Fallback response
       processedEntry = {
+        entryType: 'cashflow',
         type: 'saida',
         amount: 0,
         category: 'other',
@@ -107,6 +127,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({ 
       error: error.message,
       fallback: {
+        entryType: 'cashflow',
         type: 'saida',
         amount: 0,
         category: 'other',
