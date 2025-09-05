@@ -213,25 +213,26 @@ const SmartEntryInput = () => {
 
         {processedEntry && editedEntry && (
           <div className="space-y-4 p-4 border rounded-lg bg-muted/50">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold">Resultado da Análise:</h3>
-              <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <h3 className="font-semibold text-sm sm:text-base">Resultado da Análise:</h3>
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setIsEditing(!isEditing)}
+                  className="w-full sm:w-auto"
                 >
                   <Edit3 className="h-4 w-4 mr-1" />
                   {isEditing ? 'Cancelar' : 'Editar'}
                 </Button>
-                <Button onClick={handleConfirm} size="sm">
+                <Button onClick={handleConfirm} size="sm" className="w-full sm:w-auto">
                   <CheckCircle className="h-4 w-4 mr-1" />
                   Confirmar
                 </Button>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <Label>Tipo de Lançamento</Label>
                 <Badge className={getEntryTypeColor(editedEntry.entryType)}>
@@ -265,69 +266,71 @@ const SmartEntryInput = () => {
                 </div>
               )}
 
-              <div>
-                <Label>Valor</Label>
-                {isEditing ? (
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={editedEntry.amount}
-                    onChange={(e) => 
-                      setEditedEntry({ ...editedEntry, amount: parseFloat(e.target.value) || 0 })
-                    }
-                  />
-                ) : (
-                  <p className="font-medium">
-                    R$ {(editedEntry.amount || 0).toFixed(2)}
-                  </p>
-                )}
+              <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div>
+                  <Label>Valor</Label>
+                  {isEditing ? (
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={editedEntry.amount}
+                      onChange={(e) => 
+                        setEditedEntry({ ...editedEntry, amount: parseFloat(e.target.value) || 0 })
+                      }
+                    />
+                  ) : (
+                    <p className="font-medium text-sm sm:text-base">
+                      R$ {(editedEntry.amount || 0).toFixed(2)}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <Label>Categoria</Label>
+                  {isEditing ? (
+                    <Select
+                      value={editedEntry.category}
+                      onValueChange={(value) => 
+                        setEditedEntry({ ...editedEntry, category: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="food">Alimentação</SelectItem>
+                        <SelectItem value="transport">Transporte</SelectItem>
+                        <SelectItem value="health">Saúde</SelectItem>
+                        <SelectItem value="education">Educação</SelectItem>
+                        <SelectItem value="entertainment">Entretenimento</SelectItem>
+                        <SelectItem value="utilities">Utilidades</SelectItem>
+                        <SelectItem value="salary">Salário</SelectItem>
+                        <SelectItem value="investment">Investimento</SelectItem>
+                        <SelectItem value="other">Outros</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Badge variant="outline">{editedEntry.category}</Badge>
+                  )}
+                </div>
               </div>
 
               {editedEntry.entryType === 'negotiation' && editedEntry.creditor && (
                 <div>
                   <Label>Credor</Label>
-                  <p className="font-medium">{editedEntry.creditor}</p>
+                  <p className="font-medium text-sm sm:text-base">{editedEntry.creditor}</p>
                 </div>
               )}
 
               {editedEntry.entryType === 'negotiation' && editedEntry.installments && (
                 <div>
                   <Label>Parcelas</Label>
-                  <p className="font-medium">{editedEntry.installments}x de R$ {(editedEntry.installmentValue || 0).toFixed(2)}</p>
+                  <p className="font-medium text-sm sm:text-base">{editedEntry.installments}x de R$ {(editedEntry.installmentValue || 0).toFixed(2)}</p>
                 </div>
               )}
 
-              <div>
-                <Label>Categoria</Label>
-                {isEditing ? (
-                  <Select
-                    value={editedEntry.category}
-                    onValueChange={(value) => 
-                      setEditedEntry({ ...editedEntry, category: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="food">Alimentação</SelectItem>
-                      <SelectItem value="transport">Transporte</SelectItem>
-                      <SelectItem value="health">Saúde</SelectItem>
-                      <SelectItem value="education">Educação</SelectItem>
-                      <SelectItem value="entertainment">Entretenimento</SelectItem>
-                      <SelectItem value="utilities">Utilidades</SelectItem>
-                      <SelectItem value="salary">Salário</SelectItem>
-                      <SelectItem value="investment">Investimento</SelectItem>
-                      <SelectItem value="other">Outros</SelectItem>
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Badge variant="outline">{editedEntry.category}</Badge>
-                )}
-              </div>
-
               {editedEntry.entryType !== 'negotiation' && (
-                <div>
+                <div className="sm:col-span-2">
                   <Label>Forma de Pagamento</Label>
                   {isEditing ? (
                     <Select
@@ -354,7 +357,7 @@ const SmartEntryInput = () => {
                 </div>
               )}
 
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <Label>Descrição</Label>
                 {isEditing ? (
                   <Input
@@ -364,7 +367,7 @@ const SmartEntryInput = () => {
                     }
                   />
                 ) : (
-                  <p className="font-medium">{editedEntry.suggestedDescription}</p>
+                  <p className="font-medium text-sm sm:text-base">{editedEntry.suggestedDescription}</p>
                 )}
               </div>
             </div>

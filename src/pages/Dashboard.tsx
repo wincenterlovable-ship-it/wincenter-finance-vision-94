@@ -106,18 +106,18 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard Financeiro</h1>
-          <p className="text-muted-foreground">Visão geral da situação financeira da Wincenter</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Dashboard Financeiro</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Visão geral da situação financeira da Wincenter</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-muted-foreground" />
             <Select value={selectedDate || "all"} onValueChange={(value) => setSelectedDate(value === "all" ? null : value)}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-full sm:w-[200px]">
                 <SelectValue placeholder="Filtrar por data" />
               </SelectTrigger>
               <SelectContent>
@@ -130,27 +130,27 @@ const Dashboard = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">Última atualização</p>
-            <p className="text-sm font-medium">{new Date().toLocaleDateString('pt-BR')}</p>
+          <div className="text-left sm:text-right">
+            <p className="text-xs sm:text-sm text-muted-foreground">Última atualização</p>
+            <p className="text-xs sm:text-sm font-medium">{new Date().toLocaleDateString('pt-BR')}</p>
           </div>
         </div>
       </div>
 
       {/* Lançamento Inteligente */}
-      <div className="max-w-2xl mx-auto">
+      <div className="w-full max-w-4xl mx-auto">
         <SmartEntryInput />
       </div>
 
       {/* Métricas Principais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <Card className="bg-gradient-to-br from-success to-success-light text-success-foreground">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Receita Total</CardTitle>
             <TrendingUp className="h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">R$ {totalRevenue.toLocaleString('pt-BR')}</div>
+            <div className="text-xl sm:text-2xl font-bold">R$ {totalRevenue.toLocaleString('pt-BR')}</div>
             <p className="text-xs opacity-80">{filteredCashFlow.filter(e => e.type === 'entrada').length} entradas {selectedDate ? 'na data' : 'registradas'}</p>
           </CardContent>
         </Card>
@@ -161,7 +161,7 @@ const Dashboard = () => {
             <TrendingDown className="h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">R$ {totalDebts.toLocaleString('pt-BR')}</div>
+            <div className="text-xl sm:text-2xl font-bold">R$ {totalDebts.toLocaleString('pt-BR')}</div>
             <p className="text-xs opacity-80">{filteredDebts.length} dívidas {selectedDate ? 'na data' : 'em aberto'}</p>
           </CardContent>
         </Card>
@@ -172,7 +172,7 @@ const Dashboard = () => {
             <BarChart3 className="h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">R$ {totalOperationalCosts.toLocaleString('pt-BR')}</div>
+            <div className="text-xl sm:text-2xl font-bold">R$ {totalOperationalCosts.toLocaleString('pt-BR')}</div>
             <p className="text-xs opacity-80">R$ {fixedCosts.toLocaleString('pt-BR')} fixos + R$ {variableCosts.toLocaleString('pt-BR')} variáveis</p>
           </CardContent>
         </Card>
@@ -183,24 +183,24 @@ const Dashboard = () => {
             <DollarSign className="h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">R$ {netCashFlow.toLocaleString('pt-BR')}</div>
+            <div className="text-xl sm:text-2xl font-bold">R$ {netCashFlow.toLocaleString('pt-BR')}</div>
             <p className="text-xs opacity-80">{netCashFlow >= 0 ? 'Fluxo positivo' : 'Fluxo negativo'}</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Alertas e Ações Rápidas */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-warning" />
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+              <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-warning" />
               Ações Prioritárias
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {totalRevenue === 0 && totalExpenses === 0 && totalDebts === 0 ? (
-              <div className="flex items-center justify-center p-8 bg-accent rounded-lg">
+              <div className="flex items-center justify-center p-6 sm:p-8 bg-accent rounded-lg">
                 <div className="text-center">
                   <h4 className="font-semibold text-muted-foreground">Nenhuma ação prioritária</h4>
                   <p className="text-sm text-muted-foreground">Comece adicionando dados nas páginas do sistema</p>
@@ -210,26 +210,26 @@ const Dashboard = () => {
               <div className="space-y-3">
                 {netCashFlow < 0 && (
                   <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-                    <h4 className="font-semibold text-destructive">Fluxo de Caixa Negativo</h4>
-                    <p className="text-sm text-destructive/80">Suas saídas superam as entradas</p>
+                    <h4 className="font-semibold text-destructive text-sm sm:text-base">Fluxo de Caixa Negativo</h4>
+                    <p className="text-xs sm:text-sm text-destructive/80">Suas saídas superam as entradas</p>
                   </div>
                 )}
                 {totalDebts > totalRevenue * 0.3 && totalRevenue > 0 && (
                   <div className="p-3 bg-warning/10 border border-warning/20 rounded-lg">
-                    <h4 className="font-semibold text-warning">Alto Endividamento</h4>
-                    <p className="text-sm text-warning/80">Dívidas representam mais de 30% da receita</p>
+                    <h4 className="font-semibold text-warning text-sm sm:text-base">Alto Endividamento</h4>
+                    <p className="text-xs sm:text-sm text-warning/80">Dívidas representam mais de 30% da receita</p>
                   </div>
                 )}
                 {debts.filter(d => d.status === 'overdue').length > 0 && (
                   <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-                    <h4 className="font-semibold text-destructive">Dívidas Vencidas</h4>
-                    <p className="text-sm text-destructive/80">{debts.filter(d => d.status === 'overdue').length} dívida(s) em atraso</p>
+                    <h4 className="font-semibold text-destructive text-sm sm:text-base">Dívidas Vencidas</h4>
+                    <p className="text-xs sm:text-sm text-destructive/80">{debts.filter(d => d.status === 'overdue').length} dívida(s) em atraso</p>
                   </div>
                 )}
                 {totalRevenue > 0 && totalExpenses === 0 && (
                   <div className="p-3 bg-success/10 border border-success/20 rounded-lg">
-                    <h4 className="font-semibold text-success">Situação Positiva</h4>
-                    <p className="text-sm text-success/80">Você tem receitas sem gastos registrados</p>
+                    <h4 className="font-semibold text-success text-sm sm:text-base">Situação Positiva</h4>
+                    <p className="text-xs sm:text-sm text-success/80">Você tem receitas sem gastos registrados</p>
                   </div>
                 )}
               </div>
@@ -239,11 +239,11 @@ const Dashboard = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Status Geral</CardTitle>
+            <CardTitle className="text-sm sm:text-base">Status Geral</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-xs sm:text-sm">
                 <span>Saúde Financeira</span>
                 <span className={`font-medium ${netCashFlow >= 0 ? 'text-success' : 'text-destructive'}`}>
                   {netCashFlow >= 0 ? 'Boa' : 'Atenção'}
@@ -258,7 +258,7 @@ const Dashboard = () => {
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-xs sm:text-sm">
                 <span>Liquidez</span>
                 <span className={`font-medium ${netCashFlow > totalOperationalCosts ? 'text-success' : 'text-warning'}`}>
                   {netCashFlow > totalOperationalCosts ? 'Boa' : 'Limitada'}
@@ -273,7 +273,7 @@ const Dashboard = () => {
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-xs sm:text-sm">
                 <span>Endividamento</span>
                 <span className={`font-medium ${
                   totalRevenue === 0 ? 'text-muted-foreground' :

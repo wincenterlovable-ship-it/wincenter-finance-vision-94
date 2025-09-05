@@ -24,10 +24,10 @@ const App = () => (
             <div className="min-h-screen flex w-full bg-background">
               <AppSidebar />
               <div className="flex-1 flex flex-col">
-                <header className="h-14 flex items-center justify-between border-b bg-surface px-6">
-                  <div className="flex items-center gap-4">
+                <header className="h-14 flex items-center justify-between border-b bg-surface px-4 sm:px-6">
+                  <div className="flex items-center gap-2 sm:gap-4">
                     <SidebarTrigger />
-                    <h1 className="text-xl font-semibold text-foreground">Wincenter Financial</h1>
+                    <h1 className="text-lg sm:text-xl font-semibold text-foreground truncate">Wincenter Financial</h1>
                   </div>
                   <nav className="hidden md:flex items-center gap-2">
                     <Button asChild variant="ghost" size="sm">
@@ -44,7 +44,7 @@ const App = () => (
                     </Button>
                   </nav>
                 </header>
-                <main className="flex-1 p-6">
+                <main className="flex-1 p-4 sm:p-6 overflow-auto">
                   <Routes>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/renegotiation" element={<Renegotiation />} />

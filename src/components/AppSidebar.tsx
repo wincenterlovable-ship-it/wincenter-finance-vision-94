@@ -34,28 +34,28 @@ export function AppSidebar() {
   return (
     <Sidebar className={state === "collapsed" ? "w-14" : "w-64"}>
       <SidebarContent>
-        <div className="p-4">
-          <div className="flex items-center gap-2 mb-6">
-            <DollarSign className="h-8 w-8 text-primary" />
+        <div className="p-3 sm:p-4">
+          <div className="flex items-center gap-2 mb-4 sm:mb-6">
+            <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
             {state !== "collapsed" && (
-              <div>
-                <h2 className="text-lg font-bold text-foreground">Wincenter</h2>
-                <p className="text-sm text-muted-foreground">Financial System</p>
+              <div className="min-w-0">
+                <h2 className="text-base sm:text-lg font-bold text-foreground truncate">Wincenter</h2>
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">Financial System</p>
               </div>
             )}
           </div>
         </div>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
+          <SidebarGroupLabel className="px-3 sm:px-4">Menu Principal</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-1">
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild className="mx-2 sm:mx-3">
                     <NavLink to={item.url} className={getNavClass}>
-                      <item.icon className="h-4 w-4" />
-                      {state !== "collapsed" && <span>{item.title}</span>}
+                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      {state !== "collapsed" && <span className="truncate text-sm sm:text-base">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
