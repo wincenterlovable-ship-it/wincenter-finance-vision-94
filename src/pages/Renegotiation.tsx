@@ -33,7 +33,7 @@ const Renegotiation = () => {
     }
   };
 
-  const handleNegotiationSubmit = (e: React.FormEvent) => {
+  const handleNegotiationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const creditorName = formData.get('creditorName') as string;
@@ -45,7 +45,7 @@ const Renegotiation = () => {
     const justification = formData.get('justification') as string;
     const additionalTerms = formData.get('additionalTerms') as string;
 
-    addDebt({
+    await addDebt({
       creditor: creditorName,
       description: justification,
       amount: proposedAmount,

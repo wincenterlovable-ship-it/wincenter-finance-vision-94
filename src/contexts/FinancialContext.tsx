@@ -40,16 +40,17 @@ interface FinancialContextType {
   operationalCosts: OperationalCost[];
   debts: Debt[];
   selectedDate: string | null;
+  loading: boolean;
   setSelectedDate: (date: string | null) => void;
-  addCashFlowEntry: (entry: Omit<CashFlowEntry, 'id'>) => void;
-  addOperationalCost: (cost: Omit<OperationalCost, 'id'>) => void;
-  addDebt: (debt: Omit<Debt, 'id'>) => void;
-  updateCashFlowEntry: (id: string, entry: Partial<CashFlowEntry>) => void;
-  updateOperationalCost: (id: string, cost: Partial<OperationalCost>) => void;
-  updateDebt: (id: string, debt: Partial<Debt>) => void;
-  deleteCashFlowEntry: (id: string) => void;
-  deleteOperationalCost: (id: string) => void;
-  deleteDebt: (id: string) => void;
+  addCashFlowEntry: (entry: Omit<CashFlowEntry, 'id'>) => Promise<void>;
+  addOperationalCost: (cost: Omit<OperationalCost, 'id'>) => Promise<void>;
+  addDebt: (debt: Omit<Debt, 'id'>) => Promise<void>;
+  updateCashFlowEntry: (id: string, entry: Partial<CashFlowEntry>) => Promise<void>;
+  updateOperationalCost: (id: string, cost: Partial<OperationalCost>) => Promise<void>;
+  updateDebt: (id: string, debt: Partial<Debt>) => Promise<void>;
+  deleteCashFlowEntry: (id: string) => Promise<void>;
+  deleteOperationalCost: (id: string) => Promise<void>;
+  deleteDebt: (id: string) => Promise<void>;
   getTotalRevenue: () => number;
   getTotalExpenses: () => number;
   getTotalDebts: () => number;
@@ -79,76 +80,81 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
   const [operationalCosts, setOperationalCosts] = useState<OperationalCost[]>([]);
   const [debts, setDebts] = useState<Debt[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Load data from Supabase on component mount
+  // Load data from Supabase on mount
   useEffect(() => {
-    loadAllData();
+    loadData();
   }, []);
 
-  const loadAllData = async () => {
+  const loadData = async () => {
     try {
+      setLoading(true);
+      
       // Load cash flow entries
       const { data: cashFlowData } = await supabase
         .from('cash_flow_entries')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (cashFlowData) {
-        const formattedCashFlow = cashFlowData.map(entry => ({
-          id: entry.id,
-          description: entry.description,
-          type: entry.type as 'entrada' | 'saida',
-          amount: parseFloat(entry.amount.toString()),
-          date: entry.date,
-          category: entry.category,
-          status: entry.status,
-          paymentMethod: entry.payment_method
-        }));
-        setCashFlowEntries(formattedCashFlow);
-      }
-
       // Load operational costs
-      const { data: costsData } = await supabase
+      const { data: operationalData } = await supabase
         .from('operational_costs')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (costsData) {
-        const formattedCosts = costsData.map(cost => ({
-          id: cost.id,
-          description: cost.description,
-          type: cost.type as 'fixo' | 'variavel',
-          amount: parseFloat(cost.amount.toString()),
-          date: cost.date,
-          category: cost.category
-        }));
-        setOperationalCosts(formattedCosts);
-      }
-
       // Load debts
       const { data: debtsData } = await supabase
         .from('debts')
         .select('*')
         .order('created_at', { ascending: false });
-      
-      if (debtsData) {
-        const formattedDebts = debtsData.map(debt => ({
-          id: debt.id,
-          creditor: debt.creditor,
-          description: debt.description,
-          amount: parseFloat(debt.amount.toString()),
-          installments: debt.installments,
-          installmentValue: parseFloat(debt.installment_value.toString()),
-          totalWithInterest: parseFloat(debt.total_with_interest.toString()),
-          dueDate: debt.due_date,
-          justification: debt.justification,
-          additionalTerms: debt.additional_terms,
-          status: debt.status as 'pending' | 'negotiating' | 'overdue' | 'resolved'
+
+      if (cashFlowData) {
+        const mappedCashFlow = cashFlowData.map(item => ({
+          id: item.id,
+          description: item.description,
+          type: item.type as 'entrada' | 'saida',
+          amount: Number(item.amount),
+          date: item.date,
+          category: item.category,
+          status: item.status,
+          paymentMethod: item.payment_method
         }));
-        setDebts(formattedDebts);
+        setCashFlowEntries(mappedCashFlow);
+      }
+
+      if (operationalData) {
+        const mappedOperational = operationalData.map(item => ({
+          id: item.id,
+          description: item.description,
+          type: item.type as 'fixo' | 'variavel',
+          amount: Number(item.amount),
+          date: item.date,
+          category: item.category
+        }));
+        setOperationalCosts(mappedOperational);
+      }
+
+      if (debtsData) {
+        const mappedDebts = debtsData.map(item => ({
+          id: item.id,
+          creditor: item.creditor,
+          description: item.description,
+          amount: Number(item.amount),
+          installments: item.installments,
+          installmentValue: Number(item.installment_value),
+          totalWithInterest: Number(item.total_with_interest),
+          dueDate: item.due_date,
+          justification: item.justification,
+          additionalTerms: item.additional_terms,
+          status: item.status as 'pending' | 'negotiating' | 'overdue' | 'resolved'
+        }));
+        setDebts(mappedDebts);
       }
     } catch (error) {
-      console.error('Erro ao carregar dados:', error);
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -163,7 +169,8 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
           date: entry.date,
           category: entry.category,
           status: entry.status,
-          payment_method: entry.paymentMethod
+          payment_method: entry.paymentMethod,
+          user_id: null
         })
         .select()
         .single();
@@ -175,7 +182,7 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
           id: data.id,
           description: data.description,
           type: data.type as 'entrada' | 'saida',
-          amount: parseFloat(data.amount.toString()),
+          amount: Number(data.amount),
           date: data.date,
           category: data.category,
           status: data.status,
@@ -184,7 +191,7 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
         setCashFlowEntries(prev => [newEntry, ...prev]);
       }
     } catch (error) {
-      console.error('Erro ao adicionar entrada de fluxo de caixa:', error);
+      console.error('Error adding cash flow entry:', error);
     }
   };
 
@@ -197,7 +204,8 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
           type: cost.type,
           amount: cost.amount,
           date: cost.date,
-          category: cost.category
+          category: cost.category,
+          user_id: null
         })
         .select()
         .single();
@@ -209,14 +217,14 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
           id: data.id,
           description: data.description,
           type: data.type as 'fixo' | 'variavel',
-          amount: parseFloat(data.amount.toString()),
+          amount: Number(data.amount),
           date: data.date,
           category: data.category
         };
         setOperationalCosts(prev => [newCost, ...prev]);
       }
     } catch (error) {
-      console.error('Erro ao adicionar custo operacional:', error);
+      console.error('Error adding operational cost:', error);
     }
   };
 
@@ -234,7 +242,8 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
           due_date: debt.dueDate,
           justification: debt.justification,
           additional_terms: debt.additionalTerms,
-          status: debt.status
+          status: debt.status,
+          user_id: null
         })
         .select()
         .single();
@@ -246,31 +255,30 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
           id: data.id,
           creditor: data.creditor,
           description: data.description,
-          amount: parseFloat(data.amount.toString()),
+          amount: Number(data.amount),
           installments: data.installments,
-          installmentValue: parseFloat(data.installment_value.toString()),
-          totalWithInterest: parseFloat(data.total_with_interest.toString()),
+          installmentValue: Number(data.installment_value),
+          totalWithInterest: Number(data.total_with_interest),
           dueDate: data.due_date,
           justification: data.justification,
           additionalTerms: data.additional_terms,
           status: data.status as 'pending' | 'negotiating' | 'overdue' | 'resolved'
         };
         setDebts(prev => [newDebt, ...prev]);
-        
+
         // Automaticamente adicionar a parcela como custo operacional fixo
         if (newDebt.installmentValue > 0) {
-          const installmentCost = {
+          await addOperationalCost({
             description: `Parcela - ${newDebt.creditor}`,
-            type: 'fixo' as const,
+            type: 'fixo',
             amount: newDebt.installmentValue,
             date: newDebt.dueDate,
             category: 'financial'
-          };
-          await addOperationalCost(installmentCost);
+          });
         }
       }
     } catch (error) {
-      console.error('Erro ao adicionar dívida:', error);
+      console.error('Error adding debt:', error);
     }
   };
 
@@ -279,13 +287,13 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
       const { error } = await supabase
         .from('cash_flow_entries')
         .update({
-          description: updatedEntry.description,
-          type: updatedEntry.type,
-          amount: updatedEntry.amount,
-          date: updatedEntry.date,
-          category: updatedEntry.category,
-          status: updatedEntry.status,
-          payment_method: updatedEntry.paymentMethod
+          ...(updatedEntry.description && { description: updatedEntry.description }),
+          ...(updatedEntry.type && { type: updatedEntry.type }),
+          ...(updatedEntry.amount !== undefined && { amount: updatedEntry.amount }),
+          ...(updatedEntry.date && { date: updatedEntry.date }),
+          ...(updatedEntry.category && { category: updatedEntry.category }),
+          ...(updatedEntry.status && { status: updatedEntry.status }),
+          ...(updatedEntry.paymentMethod && { payment_method: updatedEntry.paymentMethod }),
         })
         .eq('id', id);
 
@@ -295,7 +303,7 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
         entry.id === id ? { ...entry, ...updatedEntry } : entry
       ));
     } catch (error) {
-      console.error('Erro ao atualizar entrada de fluxo de caixa:', error);
+      console.error('Error updating cash flow entry:', error);
     }
   };
 
@@ -304,11 +312,11 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
       const { error } = await supabase
         .from('operational_costs')
         .update({
-          description: updatedCost.description,
-          type: updatedCost.type,
-          amount: updatedCost.amount,
-          date: updatedCost.date,
-          category: updatedCost.category
+          ...(updatedCost.description && { description: updatedCost.description }),
+          ...(updatedCost.type && { type: updatedCost.type }),
+          ...(updatedCost.amount !== undefined && { amount: updatedCost.amount }),
+          ...(updatedCost.date && { date: updatedCost.date }),
+          ...(updatedCost.category && { category: updatedCost.category }),
         })
         .eq('id', id);
 
@@ -318,7 +326,7 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
         cost.id === id ? { ...cost, ...updatedCost } : cost
       ));
     } catch (error) {
-      console.error('Erro ao atualizar custo operacional:', error);
+      console.error('Error updating operational cost:', error);
     }
   };
 
@@ -327,16 +335,16 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
       const { error } = await supabase
         .from('debts')
         .update({
-          creditor: updatedDebt.creditor,
-          description: updatedDebt.description,
-          amount: updatedDebt.amount,
-          installments: updatedDebt.installments,
-          installment_value: updatedDebt.installmentValue,
-          total_with_interest: updatedDebt.totalWithInterest,
-          due_date: updatedDebt.dueDate,
-          justification: updatedDebt.justification,
-          additional_terms: updatedDebt.additionalTerms,
-          status: updatedDebt.status
+          ...(updatedDebt.creditor && { creditor: updatedDebt.creditor }),
+          ...(updatedDebt.description && { description: updatedDebt.description }),
+          ...(updatedDebt.amount !== undefined && { amount: updatedDebt.amount }),
+          ...(updatedDebt.installments !== undefined && { installments: updatedDebt.installments }),
+          ...(updatedDebt.installmentValue !== undefined && { installment_value: updatedDebt.installmentValue }),
+          ...(updatedDebt.totalWithInterest !== undefined && { total_with_interest: updatedDebt.totalWithInterest }),
+          ...(updatedDebt.dueDate && { due_date: updatedDebt.dueDate }),
+          ...(updatedDebt.justification && { justification: updatedDebt.justification }),
+          ...(updatedDebt.additionalTerms && { additional_terms: updatedDebt.additionalTerms }),
+          ...(updatedDebt.status && { status: updatedDebt.status }),
         })
         .eq('id', id);
 
@@ -346,7 +354,7 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
         debt.id === id ? { ...debt, ...updatedDebt } : debt
       ));
     } catch (error) {
-      console.error('Erro ao atualizar dívida:', error);
+      console.error('Error updating debt:', error);
     }
   };
 
@@ -361,7 +369,7 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
 
       setCashFlowEntries(prev => prev.filter(entry => entry.id !== id));
     } catch (error) {
-      console.error('Erro ao deletar entrada de fluxo de caixa:', error);
+      console.error('Error deleting cash flow entry:', error);
     }
   };
 
@@ -376,12 +384,13 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
 
       setOperationalCosts(prev => prev.filter(cost => cost.id !== id));
     } catch (error) {
-      console.error('Erro ao deletar custo operacional:', error);
+      console.error('Error deleting operational cost:', error);
     }
   };
 
   const deleteDebt = async (id: string) => {
     try {
+      // Get the debt info before deleting
       const debtToDelete = debts.find(debt => debt.id === id);
       
       const { error } = await supabase
@@ -393,18 +402,24 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
 
       setDebts(prev => prev.filter(debt => debt.id !== id));
       
-      // Remover o custo operacional relacionado se existir
+      // Remove related operational costs (installments)
       if (debtToDelete) {
-        const relatedCost = operationalCosts.find(cost => 
-          cost.description.includes(debtToDelete.creditor) && 
-          cost.category === 'financial'
-        );
-        if (relatedCost) {
-          await deleteOperationalCost(relatedCost.id);
+        const { error: costError } = await supabase
+          .from('operational_costs')
+          .delete()
+          .eq('description', `Parcela - ${debtToDelete.creditor}`);
+
+        if (costError) {
+          console.error('Error deleting related operational costs:', costError);
+        } else {
+          // Reload operational costs to reflect changes
+          setOperationalCosts(prev => prev.filter(cost => 
+            cost.description !== `Parcela - ${debtToDelete.creditor}`
+          ));
         }
       }
     } catch (error) {
-      console.error('Erro ao deletar dívida:', error);
+      console.error('Error deleting debt:', error);
     }
   };
 
@@ -452,6 +467,7 @@ export const FinancialProvider = ({ children }: FinancialProviderProps) => {
     operationalCosts,
     debts,
     selectedDate,
+    loading,
     setSelectedDate,
     addCashFlowEntry,
     addOperationalCost,

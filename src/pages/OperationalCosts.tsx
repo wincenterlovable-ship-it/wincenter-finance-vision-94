@@ -18,7 +18,7 @@ const OperationalCosts = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { operationalCosts, addOperationalCost, updateOperationalCost, deleteOperationalCost, getTotalOperationalCosts } = useFinancial();
 
-  const handleAddCost = (e: React.FormEvent) => {
+  const handleAddCost = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const costName = formData.get('costName') as string;
@@ -29,7 +29,7 @@ const OperationalCosts = () => {
     const frequency = formData.get('frequency') as string;
     const description = formData.get('description') as string;
 
-    addOperationalCost({
+    await addOperationalCost({
       description: costName,
       type: costType === 'fixed' ? 'fixo' : 'variavel',
       amount,

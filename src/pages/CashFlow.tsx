@@ -18,7 +18,7 @@ const CashFlow = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { cashFlowEntries, addCashFlowEntry, updateCashFlowEntry, deleteCashFlowEntry, getTotalRevenue, getTotalExpenses, getNetCashFlow } = useFinancial();
 
-  const handleAddTransaction = (e: React.FormEvent) => {
+  const handleAddTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const transactionType = formData.get('transactionType') as string;
@@ -29,7 +29,7 @@ const CashFlow = () => {
     const paymentMethod = formData.get('paymentMethod') as string;
     const description = formData.get('description') as string;
 
-    addCashFlowEntry({
+    await addCashFlowEntry({
       description,
       type: transactionType === 'inflow' ? 'entrada' : 'saida',
       amount,
@@ -53,7 +53,7 @@ const CashFlow = () => {
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdateEntry = (e: React.FormEvent) => {
+  const handleUpdateEntry = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const transactionType = formData.get('transactionType') as string;
@@ -64,7 +64,7 @@ const CashFlow = () => {
     const paymentMethod = formData.get('paymentMethod') as string;
     const description = formData.get('description') as string;
 
-    updateCashFlowEntry(editingEntry.id, {
+    await updateCashFlowEntry(editingEntry.id, {
       description,
       type: transactionType === 'inflow' ? 'entrada' : 'saida',
       amount,
@@ -83,8 +83,8 @@ const CashFlow = () => {
     setEditingEntry(null);
   };
 
-  const handleDeleteEntry = (entryId: string) => {
-    deleteCashFlowEntry(entryId);
+  const handleDeleteEntry = async (entryId: string) => {
+    await deleteCashFlowEntry(entryId);
     toast({
       title: "Transação Excluída",
       description: "A transação foi removida com sucesso.",
