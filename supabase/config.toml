@@ -1,4 +1,1 @@
 project_id = "kwmwbttcsfgtseqzmpwt"
-
-[functions.process-financial-entry]
-verify_jwt = false
