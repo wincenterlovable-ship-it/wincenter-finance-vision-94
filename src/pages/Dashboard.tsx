@@ -6,6 +6,7 @@ import { BarChart3, DollarSign, TrendingDown, TrendingUp, Users, AlertTriangle, 
 import { Link } from "react-router-dom";
 import { Area, AreaChart, Bar, BarChart, Cell, Pie, PieChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { useFinancial } from "@/contexts/FinancialContext";
+import SmartEntryInput from "@/components/SmartEntryInput";
 
 const Dashboard = () => {
   const { 
@@ -134,6 +135,11 @@ const Dashboard = () => {
             <p className="text-sm font-medium">{new Date().toLocaleDateString('pt-BR')}</p>
           </div>
         </div>
+      </div>
+
+      {/* Lançamento Inteligente */}
+      <div className="max-w-2xl mx-auto">
+        <SmartEntryInput />
       </div>
 
       {/* Métricas Principais */}
