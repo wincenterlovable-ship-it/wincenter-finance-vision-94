@@ -44,6 +44,8 @@ const OperationalCosts = () => {
 
     // Reset form
     (e.target as HTMLFormElement).reset();
+  };
+
   const handleEditCost = (cost: any) => {
     setEditingCost(cost);
     setIsEditDialogOpen(true);

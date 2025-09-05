@@ -65,6 +65,8 @@ const Renegotiation = () => {
 
     // Reset form
     (e.target as HTMLFormElement).reset();
+  };
+
   const handleEditDebt = (debt: any) => {
     setEditingDebt(debt);
     setIsEditDialogOpen(true);

@@ -46,6 +46,8 @@ const CashFlow = () => {
 
     // Reset form
     (e.target as HTMLFormElement).reset();
+  };
+
   const handleEditEntry = (entry: any) => {
     setEditingEntry(entry);
     setIsEditDialogOpen(true);
@@ -197,14 +199,14 @@ const CashFlow = () => {
                         <div className="text-lg font-bold text-success">+R$ {inflow.amount.toLocaleString('pt-BR')}</div>
                         {getStatusBadge(inflow.status || 'pending')}
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" onClick={() => handleEditEntry(outflow)}>
+                          <Button variant="outline" size="sm" onClick={() => handleEditEntry(inflow)}>
                             <Edit2 className="h-3 w-3 mr-1" />
                             Editar
                           </Button>
                           <Button 
                             variant="destructive" 
                             size="sm" 
-                            onClick={() => handleDeleteEntry(outflow.id)}
+                            onClick={() => handleDeleteEntry(inflow.id)}
                           >
                             <Trash2 className="h-3 w-3 mr-1" />
                             Excluir
@@ -252,14 +254,14 @@ const CashFlow = () => {
                         <div className="text-lg font-bold text-destructive">-R$ {outflow.amount.toLocaleString('pt-BR')}</div>
                         {getStatusBadge(outflow.status || 'pending')}
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" onClick={() => handleEditEntry(inflow)}>
+                          <Button variant="outline" size="sm" onClick={() => handleEditEntry(outflow)}>
                             <Edit2 className="h-3 w-3 mr-1" />
                             Editar
                           </Button>
                           <Button 
                             variant="destructive" 
                             size="sm" 
-                            onClick={() => handleDeleteEntry(inflow.id)}
+                            onClick={() => handleDeleteEntry(outflow.id)}
                           >
                             <Trash2 className="h-3 w-3 mr-1" />
                             Excluir
